@@ -1,17 +1,12 @@
-'use client'
+// Modified Home Page (page.js)
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material'
-import { firestore } from '@/firebase'
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  deleteDoc,
-  getDoc,
-} from 'firebase/firestore'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material';
+import { firestore } from '@/firebase';
+import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { auth } from '@/firebase';
 
 const style = {
   position: 'absolute',
@@ -26,56 +21,66 @@ const style = {
   display: 'flex',
   flexDirection: 'column',
   gap: 3,
-}
+};
 
 export default function Home() {
-  const [inventory, setInventory] = useState([])
-  const [open, setOpen] = useState(false)
-  const [itemName, setItemName] = useState('')
+  const router = useRouter();
+  const [inventory, setInventory] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [itemName, setItemName] = useState('');
 
   const updateInventory = async () => {
-    const snapshot = query(collection(firestore, "inventory"))
-    const docs = await getDocs(snapshot)
-    const inventoryList = []
+    const snapshot = query(collection(firestore, "inventory"));
+    const docs = await getDocs(snapshot);
+    const inventoryList = [];
     docs.forEach((doc) => {
-      inventoryList.push({ name: doc.id, ...doc.data() })
-    })
-    setInventory(inventoryList)
-  }
-  
+      inventoryList.push({ name: doc.id, ...doc.data() });
+    });
+    setInventory(inventoryList);
+  };
+
   useEffect(() => {
-    updateInventory()
-  }, [])
+    // Check if the user is logged in
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        router.push('/login'); // Redirect to sign-in if not logged in
+      } else {
+        updateInventory();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const addItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
-    const docSnap = await getDoc(docRef)
+    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data()
-      await setDoc(docRef, { quantity: quantity + 1 })
+      const { quantity } = docSnap.data();
+      await setDoc(docRef, { quantity: quantity + 1 });
     } else {
-      await setDoc(docRef, { quantity: 1 })
+      await setDoc(docRef, { quantity: 1 });
     }
-    await updateInventory()
-  }
-  
+    await updateInventory();
+  };
+
   const removeItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
-    const docSnap = await getDoc(docRef)
+    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data()
+      const { quantity } = docSnap.data();
       if (quantity === 1) {
-        await deleteDoc(docRef)
+        await deleteDoc(docRef);
       } else {
-        await setDoc(docRef, { quantity: quantity - 1 })
+        await setDoc(docRef, { quantity: quantity - 1 });
       }
     }
-    await updateInventory()
-  }
-  
-  const handleOpen=()=> setOpen(true)
-  const handleClose=()=> setOpen(false)
-  
+    await updateInventory();
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
     <Box
       width="100vw"
@@ -86,6 +91,13 @@ export default function Home() {
       alignItems={'center'}
       gap={2}
     >
+      <Button variant="contained" onClick={() => router.push('/login')}>
+        Sign In
+      </Button>
+      <Button variant="contained" onClick={() => router.push('/sign-up')}>
+        Sign Up
+      </Button>
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -108,9 +120,9 @@ export default function Home() {
             <Button
               variant="outlined"
               onClick={() => {
-                addItem(itemName)
-                setItemName('')
-                handleClose()
+                addItem(itemName);
+                setItemName('');
+                handleClose();
               }}
             >
               Add
@@ -135,7 +147,7 @@ export default function Home() {
           </Typography>
         </Box>
         <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
-          {inventory.map(({name, quantity}) => (
+          {inventory.map(({ name, quantity }) => (
             <Box
               key={name}
               width="100%"
@@ -160,5 +172,5 @@ export default function Home() {
         </Stack>
       </Box>
     </Box>
-  )
+  );
 }
