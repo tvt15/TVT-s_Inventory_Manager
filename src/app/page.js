@@ -8,26 +8,14 @@ import { firestore } from '@/firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { auth } from '@/firebase';
 
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'white',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 3,
-};
+import styles from './Home.module.css'; // Import the CSS module
 
 export default function Home() {
   const router = useRouter();
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [user, setUser] = useState(null);
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -40,12 +28,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Check if the user is logged in
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        router.push('/login'); // Redirect to sign-in if not logged in
-      } else {
+      if (user) {
+        setUser(user);
         updateInventory();
+      } else {
+        router.push('/login');
       }
     });
 
@@ -81,22 +69,27 @@ export default function Home() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out', error);
+    }
+  };
+
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display={'flex'}
-      justifyContent={'center'}
-      flexDirection={'column'}
-      alignItems={'center'}
-      gap={2}
-    >
-      <Button variant="contained" onClick={() => router.push('/login')}>
-        Sign In
-      </Button>
-      <Button variant="contained" onClick={() => router.push('/sign-up')}>
-        Sign Up
-      </Button>
+    <Box className={styles.container}>
+      <div className={styles.header}>
+        {user && (
+          <>
+            <Typography variant="h6">Welcome, {user.displayName || 'User'}</Typography>
+            <Button variant="contained" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </>
+        )}
+      </div>
 
       <Modal
         open={open}
@@ -104,7 +97,7 @@ export default function Home() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box className={styles.modalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Add Item
           </Typography>
@@ -130,6 +123,7 @@ export default function Home() {
           </Stack>
         </Box>
       </Modal>
+
       <Button variant="contained" onClick={handleOpen}>
         Add New Item
       </Button>
