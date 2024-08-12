@@ -34,12 +34,12 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
 
-  const updateInventory = async () => {
-    const snapshot = query(collection(firestore, "inventory"));
-    const docs = await getDocs(snapshot);
+  const updateInventory = async (userId) => {
+    const userInventoryRef = collection(firestore, "users", userId, "inventory");
+    const snapshot = await getDocs(userInventoryRef);
     const inventoryList = [];
     const categoriesSet = new Set();
-    docs.forEach((doc) => {
+    snapshot.forEach((doc) => {
       const data = doc.data();
       inventoryList.push({ id: doc.id, ...data });
       if (data.category) categoriesSet.add(data.category);
@@ -52,7 +52,7 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
-        updateInventory();
+        updateInventory(user.uid);
       } else {
         router.push('/login');
       }
@@ -63,18 +63,18 @@ export default function Home() {
 
   const increaseItemQuantity = async (itemId) => {
     try {
-      if (!itemId) {
-        console.error('Invalid itemId');
+      if (!itemId || !user) {
+        console.error('Invalid itemId or user not logged in');
         return;
       }
-      const docRef = doc(collection(firestore, 'inventory'), itemId);
+      const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), itemId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
         const quantity = (data.quantity || 0) + 1;
         const category = data.category || '';
         await setDoc(docRef, { quantity, category }, { merge: true });
-        await updateInventory();
+        await updateInventory(user.uid);
       } else {
         console.error('Document does not exist');
       }
@@ -85,25 +85,29 @@ export default function Home() {
   
   const addNewItem = async () => {
     try {
-      if (!itemName || (!itemCategory && !newCategory)) {
-        console.error('Invalid item data');
+      if (!itemName || (!itemCategory && !newCategory) || !user) {
+        console.error('Invalid item data or user not logged in');
         return;
       }
       const category = itemCategory === 'new' ? newCategory : itemCategory;
-      const docRef = doc(collection(firestore, 'inventory'), itemName);
+      const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), itemName);
       await setDoc(docRef, { quantity: 1, category });
       setItemName('');
       setItemCategory('');
       setNewCategory('');
       setOpen(false);
-      await updateInventory();
+      await updateInventory(user.uid);
     } catch (error) {
       console.error('Error adding new item:', error);
     }
   };
 
   const removeItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item.id);
+    if (!user) {
+      console.error('User not logged in');
+      return;
+    }
+    const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), item.id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const { quantity } = docSnap.data();
@@ -113,15 +117,30 @@ export default function Home() {
         await setDoc(docRef, { ...docSnap.data(), quantity: quantity - 1 });
       }
     }
-    await updateInventory();
+    await updateInventory(user.uid);
   };
 
   const deleteItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item.id);
+    if (!user) {
+      console.error('User not logged in');
+      return;
+    }
+    const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), item.id);
     await deleteDoc(docRef);
-    await updateInventory();
+    await updateInventory(user.uid);
   };
 
+  const handleEditSave = async () => {
+    if (editItem && user) {
+      const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), editItem.id);
+      await setDoc(docRef, { 
+        quantity: parseInt(editItem.quantity),
+        category: editItem.category
+      });
+      handleEditClose();
+      await updateInventory(user.uid);
+    }
+  };
   const handleEditOpen = (item) => {
     setEditItem(item);
     setEditOpen(true);
@@ -131,19 +150,6 @@ export default function Home() {
     setEditItem(null);
     setEditOpen(false);
   };
-
-  const handleEditSave = async () => {
-    if (editItem) {
-      const docRef = doc(collection(firestore, 'inventory'), editItem.id);
-      await setDoc(docRef, { 
-        quantity: parseInt(editItem.quantity),
-        category: editItem.category
-      });
-      handleEditClose();
-      await updateInventory();
-    }
-  };
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
