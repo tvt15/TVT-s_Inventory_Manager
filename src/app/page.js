@@ -33,6 +33,11 @@ export default function Home() {
   const [editOpen, setEditOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
+  const [itemPrice, setItemPrice] = useState('');
+  const [itemDescription, setItemDescription] = useState('');
+  const [itemSupplier, setItemSupplier] = useState('');
+  const [sortBy, setSortBy] = useState('name'); // for sorting
+  const [filterCategory, setFilterCategory] = useState('');
 
   const updateInventory = async (userId) => {
     const userInventoryRef = collection(firestore, "users", userId, "inventory");
@@ -59,7 +64,7 @@ export default function Home() {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, sortBy, filterCategory]);
 
   const increaseItemQuantity = async (itemId) => {
     try {
@@ -91,10 +96,19 @@ export default function Home() {
       }
       const category = itemCategory === 'new' ? newCategory : itemCategory;
       const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), itemName);
-      await setDoc(docRef, { quantity: 1, category });
+      await setDoc(docRef, { 
+        quantity: 1, 
+        category,
+        price: parseFloat(itemPrice) || 0,
+        description: itemDescription || '',
+        supplier: itemSupplier || ''
+      });
       setItemName('');
       setItemCategory('');
       setNewCategory('');
+      setItemPrice('');
+      setItemDescription('');
+      setItemSupplier('');
       setOpen(false);
       await updateInventory(user.uid);
     } catch (error) {
@@ -133,9 +147,12 @@ export default function Home() {
   const handleEditSave = async () => {
     if (editItem && user) {
       const docRef = doc(collection(firestore, 'users', user.uid, 'inventory'), editItem.id);
-      await setDoc(docRef, { 
+      await setDoc(docRef, {
         quantity: parseInt(editItem.quantity),
-        category: editItem.category
+        category: editItem.category,
+        price: parseFloat(editItem.price) || 0,
+        description: editItem.description || '',
+        supplier: editItem.supplier || ''
       });
       handleEditClose();
       await updateInventory(user.uid);
@@ -165,6 +182,15 @@ export default function Home() {
   const filteredInventory = inventory.filter(item =>
     item.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const sortedAndFilteredInventory = filteredInventory
+  .filter(item => filterCategory ? item.category === filterCategory : true)
+  .sort((a, b) => {
+    if (sortBy === 'name') return a.id.localeCompare(b.id);
+    if (sortBy === 'category') return a.category.localeCompare(b.category);
+    if (sortBy === 'price') return a.price - b.price;
+    return 0;
+  });
 
   return (
     <Box className={styles.container} sx={{ backgroundColor: '#f5f5f5', padding: '20px', position: 'relative' }}>
@@ -198,6 +224,8 @@ export default function Home() {
           Sign Out
         </Button>
       </Box>
+
+
 
       {/* Search and Add New Item */}
       <Box sx={{ 
@@ -251,9 +279,31 @@ export default function Home() {
         </Button>
       </Box>
 
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+      <Select
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+        sx={{ width: 200 }}
+      >
+        <MenuItem value="name">Sort by Name</MenuItem>
+        <MenuItem value="category">Sort by Category</MenuItem>
+        <MenuItem value="price">Sort by Price</MenuItem>
+      </Select>
+      <Select
+        value={filterCategory}
+        onChange={(e) => setFilterCategory(e.target.value)}
+        sx={{ width: 200 }}
+      >
+        <MenuItem value="">All Categories</MenuItem>
+        {categories.map((category) => (
+          <MenuItem key={category} value={category}>{category}</MenuItem>
+        ))}
+      </Select>
+    </Box>
+
       {/* Inventory Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
-        {filteredInventory.map((item, index) => (
+        {sortedAndFilteredInventory.map((item, index) => (
           <Card 
             key={item.id} 
             sx={{ 
@@ -268,17 +318,14 @@ export default function Home() {
               },
             }}
           >
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="div" sx={{ mb: 1, color: '#333333' }}>
-                {item.id.charAt(0).toUpperCase() + item.id.slice(1)}
-              </Typography>
-              <Typography color="text.secondary">
-                Quantity: {item.quantity}
-              </Typography>
-              <Typography color="text.secondary">
-                Category: {item.category}
-              </Typography>
-            </CardContent>
+            <CardContent>
+    <Typography variant="h6">{item.id}</Typography>
+    <Typography>Quantity: {item.quantity}</Typography>
+    <Typography>Category: {item.category}</Typography>
+    <Typography>Price: ${item.price}</Typography>
+    <Typography>Supplier: {item.supplier}</Typography>
+    <Typography>Description: {item.description}</Typography>
+  </CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1, backgroundColor: alpha('#ffffff', 0.3) }}>
               <IconButton onClick={() => removeItem(item)} sx={{ color: '#d32f2f' }}>
                 <RemoveIcon />
@@ -298,95 +345,129 @@ export default function Home() {
       </Box>
 
       {/* Add New Item Modal */}
-      <Modal
-  open={open}
-  onClose={handleClose}
-  aria-labelledby="modal-modal-title"
-  aria-describedby="modal-modal-description"
->
+      <Modal open={open} onClose={handleClose}>
   <Box className={styles.modalStyle}>
-    <Typography id="modal-modal-title" variant="h6" component="h2">
-      Add New Item
-    </Typography>
+    <Typography variant="h6" component="h2">Add New Item</Typography>
     <TextField
       label="Item Name"
-      variant="outlined"
-      fullWidth
       value={itemName}
       onChange={(e) => setItemName(e.target.value)}
-      sx={{ mb: 2 }}
+      fullWidth
+      margin="normal"
     />
     <Select
       value={itemCategory}
       onChange={(e) => setItemCategory(e.target.value)}
       fullWidth
-      sx={{ mb: 2 }}
+      margin="normal"
     >
       {categories.map((category) => (
-        <MenuItem key={category} value={category}>
-          {category}
-        </MenuItem>
+        <MenuItem key={category} value={category}>{category}</MenuItem>
       ))}
-      <MenuItem value="new">
-        <em>Add New Category</em>
-      </MenuItem>
+      <MenuItem value="new"><em>Add New Category</em></MenuItem>
     </Select>
     {itemCategory === 'new' && (
       <TextField
         label="New Category"
-        variant="outlined"
-        fullWidth
         value={newCategory}
         onChange={(e) => setNewCategory(e.target.value)}
-        sx={{ mb: 2 }}
+        fullWidth
+        margin="normal"
       />
     )}
-    <Button
-      variant="contained"
-      onClick={addNewItem}
+    <TextField
+      label="Price"
+      type="number"
+      value={itemPrice}
+      onChange={(e) => setItemPrice(e.target.value)}
       fullWidth
-    >
-      Add
-    </Button>
+      margin="normal"
+    />
+    <TextField
+      label="Description"
+      value={itemDescription}
+      onChange={(e) => setItemDescription(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Supplier"
+      value={itemSupplier}
+      onChange={(e) => setItemSupplier(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <Button variant="contained" onClick={addNewItem} fullWidth>Add</Button>
   </Box>
 </Modal>
 
       {/* Edit Item Dialog */}
       <Dialog open={editOpen} onClose={handleEditClose}>
-        <DialogTitle>Edit Item</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Item Name"
-            fullWidth
-            variant="outlined"
-            value={editItem?.id || ''}
-            disabled
-          />
-          <TextField
-            margin="dense"
-            label="Quantity"
-            fullWidth
-            variant="outlined"
-            type="number"
-            value={editItem?.quantity || ''}
-            onChange={(e) => setEditItem({...editItem, quantity: e.target.value})}
-          />
-          <TextField
-            margin="dense"
-            label="Category"
-            fullWidth
-            variant="outlined"
-            value={editItem?.category || ''}
-            onChange={(e) => setEditItem({...editItem, category: e.target.value})}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEditClose}>Cancel</Button>
-          <Button onClick={handleEditSave}>Save</Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle>Edit Item</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="Item Name"
+      value={editItem?.id || ''}
+      disabled
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Quantity"
+      type="number"
+      value={editItem?.quantity || ''}
+      onChange={(e) => setEditItem({...editItem, quantity: e.target.value})}
+      fullWidth
+      margin="normal"
+    />
+    <Select
+      value={editItem?.category || ''}
+      onChange={(e) => setEditItem({...editItem, category: e.target.value})}
+      fullWidth
+      margin="normal"
+    >
+      {categories.map((category) => (
+        <MenuItem key={category} value={category}>{category}</MenuItem>
+      ))}
+      <MenuItem value="new"><em>Add New Category</em></MenuItem>
+    </Select>
+    {editItem?.category === 'new' && (
+      <TextField
+        label="New Category"
+        value={newCategory}
+        onChange={(e) => setNewCategory(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+    )}
+    <TextField
+      label="Price"
+      type="number"
+      value={editItem?.price || ''}
+      onChange={(e) => setEditItem({...editItem, price: e.target.value})}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Description"
+      value={editItem?.description || ''}
+      onChange={(e) => setEditItem({...editItem, description: e.target.value})}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Supplier"
+      value={editItem?.supplier || ''}
+      onChange={(e) => setEditItem({...editItem, supplier: e.target.value})}
+      fullWidth
+      margin="normal"
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleEditClose}>Cancel</Button>
+    <Button onClick={handleEditSave}>Save</Button>
+  </DialogActions>
+</Dialog>
     </Box>
   );
 }
