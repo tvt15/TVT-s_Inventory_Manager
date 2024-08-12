@@ -17,16 +17,16 @@ Welcome to our cutting-edge Inventory Management System! This project leverages 
     <td>Dashboard</td>
   </tr>
   <tr>
-    <td><img src="path_to_login_screenshot.png" width="400"/></td>
-    <td><img src="path_to_dashboard_screenshot.png" width="400"/></td>
+    <td><img src="public/Inventory_Login.png" width="400"/></td>
+    <td><img src="public/Inventory_Dashboard.png" width="400"/></td>
   </tr>
   <tr>
-    <td>Add New Item</td>
+    <td>Edit Item</td>
     <td>Item Details</td>
   </tr>
   <tr>
-    <td><img src="path_to_add_item_screenshot.png" width="400"/></td>
-    <td><img src="path_to_item_details_screenshot.png" width="400"/></td>
+    <td><img src="public/Inventory_Edit.png" width="400"/></td>
+    <td><img src="public/Inventory_View.png" width="400"/></td>
   </tr>
 </table>
 ## 🛠 Technologies Used
