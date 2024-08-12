@@ -29,6 +29,7 @@ Welcome to our cutting-edge Inventory Management System! This project leverages 
     <td><img src="public/Inventory_View.png" width="400"/></td>
   </tr>
 </table>
+
 ## 🛠 Technologies Used
 
 - **Frontend:**
