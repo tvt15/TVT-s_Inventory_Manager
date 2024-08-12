@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 Next-Gen Inventory Management System
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![MUI](https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+## 🌟 Overview
 
-## Getting Started
+Welcome to our cutting-edge Inventory Management System! This project leverages modern web technologies to provide a seamless, user-friendly experience for managing your inventory needs.
 
-First, run the development server:
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td>Login Screen</td>
+    <td>Dashboard</td>
+  </tr>
+  <tr>
+    <td><img src="path_to_login_screenshot.png" width="400"/></td>
+    <td><img src="path_to_dashboard_screenshot.png" width="400"/></td>
+  </tr>
+  <tr>
+    <td>Add New Item</td>
+    <td>Item Details</td>
+  </tr>
+  <tr>
+    <td><img src="path_to_add_item_screenshot.png" width="400"/></td>
+    <td><img src="path_to_item_details_screenshot.png" width="400"/></td>
+  </tr>
+</table>
+## 🛠 Technologies Used
+
+- **Frontend:**
+  - ⚛️ React.js
+  - 🔺 Next.js
+  - 🎨 Material-UI (MUI)
+
+- **Backend:**
+    - 🔥 Firebase
+    - 🔐 Authentication
+    - 🗄️ Firestore Database
+
+- **State Management:**
+  - 🪝 React Hooks
+
+- **Styling:**
+  - 💅 CSS Modules
+
+- **Hosting**
+    - Vercel
+
+## ✨ Features
+
+### 1. 🔒 User Authentication
+- Secure sign-up and login functionality
+- Google Sign-In integration
+- Email/Password authentication
+
+### 2. 📊 Inventory Management
+- Add new items with detailed information:
+  - Name
+  - Category
+  - Price
+  - Description
+  - Supplier
+  - Quantity
+- Edit existing items
+- Delete items
+- Increase/Decrease item quantity
+
+### 3. 🔍 Advanced Filtering and Sorting
+- Sort items by:
+  - Name
+  - Category
+  - Price
+- Filter items by category
+
+### 4. 👀 Item Details View
+- Compact card view showing essential info
+- Detailed view accessible via an "eye" icon
+
+### 5. 🎨 User-Friendly Interface
+- Responsive design for various screen sizes
+- Intuitive icons for actions
+- Modal dialogs for adding and editing items
+
+### 6. 🔒 Data Security
+- User-specific inventories
+- Firestore security rules to protect user data
+
+## 🚀 Getting Started
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/tvt15/TVT-s_Inventory_Manager.git 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+cd inventory-management
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+3. Set up your Firebase configuration in `firebase.js`
 
-## Learn More
+Make sure the Rules are as below:
+```bash
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Run the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 📚 Documentation
 
-## Deploy on Vercel
+For more detailed information about the project structure and API, please refer to our [Documentation](docs/index.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤝 Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for more details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgements
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [Material-UI Documentation](https://mui.com/getting-started/usage/)
+- [Firebase Documentation](https://firebase.google.com/docs)
+
+---
+
+Built with ❤️ by Tanishq Todkar (TVT)

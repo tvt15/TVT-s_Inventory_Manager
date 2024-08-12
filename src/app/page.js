@@ -14,6 +14,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { firestore } from '@/firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { auth } from '@/firebase';
@@ -237,79 +238,83 @@ export default function Home() {
 
 
 
-      {/* Search and Add New Item */}
+      {/* Search and Add New Item and Filtering options */}
       <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 3,
-        mt: '70px',
-        gap: '20px'
-      }}>
-        <TextField
-          placeholder="Search items..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            width: '300px',
-            backgroundColor: 'white',
-            borderRadius: 1,
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#4a4a4a',
-              },
-              '&:hover fieldset': {
-                borderColor: '#333333',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#333333',
-              },
-            },
-          }}
-        />
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'center', 
+  mb: 3,
+  mt: '70px',
+  width: '100%'
+}}>
+  {/* Left side: Search bar and Add New Item button */}
+  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+    <TextField
+      placeholder="Search items..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        width: '300px',
+        backgroundColor: 'white',
+        borderRadius: 1,
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: '#4a4a4a',
+          },
+          '&:hover fieldset': {
+            borderColor: '#333333',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#333333',
+          },
+        },
+      }}
+    />
+    <Button 
+      variant="contained" 
+      onClick={handleOpen} 
+      sx={{ 
+        backgroundColor: '#4a4a4a', 
+        '&:hover': { 
+          backgroundColor: '#333333' 
+        } 
+      }}
+    >
+      Add New Item
+    </Button>
+  </Box>
 
-        <Button 
-          variant="contained" 
-          onClick={handleOpen} 
-          sx={{ 
-            backgroundColor: '#4a4a4a', 
-            '&:hover': { 
-              backgroundColor: '#333333' 
-            } 
-          }}
-        >
-          Add New Item
-        </Button>
-      </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-      <Select
-        value={sortBy}
-        onChange={(e) => setSortBy(e.target.value)}
-        sx={{ width: 200 }}
-      >
-        <MenuItem value="name">Sort by Name</MenuItem>
-        <MenuItem value="category">Sort by Category</MenuItem>
-        <MenuItem value="price">Sort by Price</MenuItem>
-      </Select>
-      <Select
-        value={filterCategory}
-        onChange={(e) => setFilterCategory(e.target.value)}
-        sx={{ width: 200 }}
-      >
-        <MenuItem value="">All Categories</MenuItem>
-        {categories.map((category) => (
-          <MenuItem key={category} value={category}>{category}</MenuItem>
-        ))}
-      </Select>
-    </Box>
+  {/* Right side: Sorting and Filtering options */}
+  <Box sx={{ display: 'flex', gap: 2 , alignItems:'center'}}>
+  <FilterListIcon sx={{ color: 'text.secondary' }} />
+    <Select
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value)}
+      sx={{ width: 150, backgroundColor: 'white' }}
+    >
+      <MenuItem value="name">Sort by Name</MenuItem>
+      <MenuItem value="category">Sort by Category</MenuItem>
+      <MenuItem value="price">Sort by Price</MenuItem>
+    </Select>
+    <Select
+      value={filterCategory}
+      onChange={(e) => setFilterCategory(e.target.value)}
+      sx={{ width: 150, backgroundColor: 'white' }}
+    >
+      <MenuItem value="">All Categories</MenuItem>
+      {categories.map((category) => (
+        <MenuItem key={category} value={category}>{category}</MenuItem>
+      ))}
+    </Select>
+  </Box>
+</Box>
 
       {/* Inventory Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
