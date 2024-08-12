@@ -61,17 +61,34 @@ export default function Home() {
     return () => unsubscribe();
   }, [router]);
 
-  const addItem = async (itemId) => {
-    if (itemId) {
-      // This is for increasing quantity of existing item
+  const increaseItemQuantity = async (itemId) => {
+    try {
+      if (!itemId) {
+        console.error('Invalid itemId');
+        return;
+      }
       const docRef = doc(collection(firestore, 'inventory'), itemId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const { quantity, category } = docSnap.data();
-        await setDoc(docRef, { quantity: quantity + 1, category });
+        const data = docSnap.data();
+        const quantity = (data.quantity || 0) + 1;
+        const category = data.category || '';
+        await setDoc(docRef, { quantity, category }, { merge: true });
+        await updateInventory();
+      } else {
+        console.error('Document does not exist');
       }
-    } else if (itemName && (itemCategory || newCategory)) {
-      // This is for adding a new item
+    } catch (error) {
+      console.error('Error increasing item quantity:', error);
+    }
+  };
+  
+  const addNewItem = async () => {
+    try {
+      if (!itemName || (!itemCategory && !newCategory)) {
+        console.error('Invalid item data');
+        return;
+      }
       const category = itemCategory === 'new' ? newCategory : itemCategory;
       const docRef = doc(collection(firestore, 'inventory'), itemName);
       await setDoc(docRef, { quantity: 1, category });
@@ -79,8 +96,10 @@ export default function Home() {
       setItemCategory('');
       setNewCategory('');
       setOpen(false);
+      await updateInventory();
+    } catch (error) {
+      console.error('Error adding new item:', error);
     }
-    await updateInventory();
   };
 
   const removeItem = async (item) => {
@@ -264,7 +283,7 @@ export default function Home() {
               <IconButton onClick={() => deleteItem(item)} sx={{ color: '#d32f2f' }}>
                 <DeleteIcon />
               </IconButton>
-              <IconButton onClick={() => addItem(item.id)} sx={{ color: '#388e3c' }}>
+              <IconButton onClick={() => increaseItemQuantity(item.id)} sx={{ color: '#388e3c' }}>
                 <AddIcon />
               </IconButton>
             </Box>
@@ -318,7 +337,7 @@ export default function Home() {
     )}
     <Button
       variant="contained"
-      onClick={addItem}
+      onClick={addNewItem}
       fullWidth
     >
       Add
