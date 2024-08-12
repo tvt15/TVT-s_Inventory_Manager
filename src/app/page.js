@@ -13,6 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { firestore } from '@/firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { auth } from '@/firebase';
@@ -38,6 +39,7 @@ export default function Home() {
   const [itemSupplier, setItemSupplier] = useState('');
   const [sortBy, setSortBy] = useState('name'); // for sorting
   const [filterCategory, setFilterCategory] = useState('');
+  const [detailItem, setDetailItem] = useState(null);
 
   const updateInventory = async (userId) => {
     const userInventoryRef = collection(firestore, "users", userId, "inventory");
@@ -169,6 +171,14 @@ export default function Home() {
   };
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const handleOpenDetail = (item) => {
+    setDetailItem(item);
+  };
+  
+  const handleCloseDetail = () => {
+    setDetailItem(null);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -303,46 +313,87 @@ export default function Home() {
 
       {/* Inventory Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
-        {sortedAndFilteredInventory.map((item, index) => (
-          <Card 
-            key={item.id} 
-            sx={{ 
-              width: 250, 
-              display: 'flex', 
-              flexDirection: 'column',
-              backgroundColor: colors[index % colors.length],
-              transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: 3,
-              },
-            }}
-          >
-            <CardContent>
-    <Typography variant="h6">{item.id}</Typography>
-    <Typography>Quantity: {item.quantity}</Typography>
-    <Typography>Category: {item.category}</Typography>
-    <Typography>Price: ${item.price}</Typography>
-    <Typography>Supplier: {item.supplier}</Typography>
-    <Typography>Description: {item.description}</Typography>
-  </CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1, backgroundColor: alpha('#ffffff', 0.3) }}>
-              <IconButton onClick={() => removeItem(item)} sx={{ color: '#d32f2f' }}>
-                <RemoveIcon />
-              </IconButton>
-              <IconButton onClick={() => handleEditOpen(item)} sx={{ color: '#1976d2' }}>
-                <EditIcon />
-              </IconButton>
-              <IconButton onClick={() => deleteItem(item)} sx={{ color: '#d32f2f' }}>
-                <DeleteIcon />
-              </IconButton>
-              <IconButton onClick={() => increaseItemQuantity(item.id)} sx={{ color: '#388e3c' }}>
-                <AddIcon />
-              </IconButton>
-            </Box>
-          </Card>
-        ))}
+  {sortedAndFilteredInventory.map((item, index) => (
+    <Card 
+      key={item.id} 
+      sx={{ 
+        width: 250, 
+        display: 'flex', 
+        flexDirection: 'column',
+        backgroundColor: colors[index % colors.length],
+        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-5px)',
+          boxShadow: 3,
+        },
+      }}
+    >
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="div" sx={{ mb: 1, color: '#333333' }}>
+          {item.id.charAt(0).toUpperCase() + item.id.slice(1)}
+        </Typography>
+        <Typography color="text.secondary">
+          Price: ${item.price}
+        </Typography>
+        <Typography color="text.secondary">
+          Category: {item.category}
+        </Typography>
+      </CardContent>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1, backgroundColor: alpha('#ffffff', 0.3) }}>
+        <IconButton onClick={() => removeItem(item)} sx={{ color: '#d32f2f' }}>
+          <RemoveIcon />
+        </IconButton>
+        <IconButton onClick={() => handleEditOpen(item)} sx={{ color: '#1976d2' }}>
+          <EditIcon />
+        </IconButton>
+        <IconButton onClick={() => deleteItem(item)} sx={{ color: '#d32f2f' }}>
+          <DeleteIcon />
+        </IconButton>
+        <IconButton onClick={() => increaseItemQuantity(item.id)} sx={{ color: '#388e3c' }}>
+          <AddIcon />
+        </IconButton>
+        <IconButton onClick={() => handleOpenDetail(item)} sx={{ color: '#000000' }}>
+          <VisibilityIcon />
+        </IconButton>
       </Box>
+    </Card>
+  ))}
+</Box>
+{/*Display Modal*/}
+<Modal
+  open={Boolean(detailItem)}
+  onClose={handleCloseDetail}
+  aria-labelledby="detail-modal-title"
+  aria-describedby="detail-modal-description"
+>
+  <Box sx={{
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor:'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    color: 'text.primary'
+  }}>
+    {detailItem && (
+      <>
+        <Typography id="detail-modal-title" variant="h6" component="h2">
+          {detailItem.id}
+        </Typography>
+        <Typography id="detail-modal-description" sx={{ mt: 2 }}>
+          Price: ${detailItem.price}<br />
+          Category: {detailItem.category}<br />
+          Quantity: {detailItem.quantity}<br />
+          Description: {detailItem.description}<br />
+          Supplier: {detailItem.supplier}
+        </Typography>
+      </>
+    )}
+  </Box>
+</Modal>
 
       {/* Add New Item Modal */}
       <Modal open={open} onClose={handleClose}>
