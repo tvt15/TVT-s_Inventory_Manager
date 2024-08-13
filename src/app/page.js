@@ -205,118 +205,187 @@ export default function Home() {
   });
 
   return (
-    <Box className={styles.container} sx={{ backgroundColor: '#f5f5f5', padding: '20px', position: 'relative' }}>
-      {/* Welcome message and sign out button */}
-      <Box sx={{ 
-        position: 'absolute',
-        top: '20px',
-        right: '20px',
-        display: 'flex', 
-        alignItems: 'center', 
-        backgroundColor: '#e0e0e0',
-        padding: '10px 20px',
-        borderRadius: '8px',
-        gap: '15px'
+    <Box sx={{ 
+      backgroundColor: '#f5f5f5', 
+      minHeight: '100vh',
+      width: '100%',
+      padding: 0, // Remove all padding from the main container
+    }}>
+      {/* Header Section */}
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        position: 'relative',
+        width: '100%', // Ensure full width
+        mb: 4,
+        pb: 2,
+        borderBottom: '2px solid #e0e0e0',
+        minHeight: '80px',
+        backgroundColor: 'white', // Optional: add a background color to distinguish the header
       }}>
-        {user && (
-          <Typography variant="h6" sx={{ color: '#333' }}>
-            Welcome, {user.displayName || 'User'}
-          </Typography>
-        )}
-        <Button 
-          variant="contained" 
-          onClick={handleSignOut} 
+        {/* Welcome message and sign out button */}
+        <Box sx={{ 
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px',
+          padding: '10px 20px', // Add some right padding
+        }}>
+          {user && (
+            <Typography variant="h6" sx={{ 
+              color: '#34495e',
+            }}>
+              Welcome, {user.displayName || 'User'}
+            </Typography>
+          )}
+          <Button 
+            variant="contained" 
+            onClick={handleSignOut} 
+            sx={{ 
+              backgroundColor: '#3498db', 
+              '&:hover': { 
+                backgroundColor: '#2980b9' 
+              },
+              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+              textTransform: 'none',
+              height: '40px'
+            }}
+          >
+            Sign Out
+          </Button>
+        </Box>
+  
+        {/* Inventory Management Title */}
+        <Typography 
+          variant="h3" 
           sx={{ 
-            backgroundColor: '#4a4a4a', 
-            '&:hover': { 
-              backgroundColor: '#333333' 
-            } 
+            fontWeight: 'bold',
+            color: '#2c3e50',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+            fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+            mt: 5, // Add top margin to push it down a bit
+            mb: 2, // Add some bottom margin
           }}
         >
-          Sign Out
-        </Button>
+          Inventory Management
+        </Typography>
       </Box>
-
-
-
-      {/* Search and Add New Item and Filtering options */}
+  
+      {/* Content Container */}
+    <Box sx={{ padding: '0 20px' }}>
+      {/* Search, Add New Item, and Filtering options */}
       <Box sx={{ 
-  display: 'flex', 
-  justifyContent: 'space-between', 
-  alignItems: 'center', 
-  mb: 3,
-  mt: '70px',
-  width: '100%'
-}}>
-  {/* Left side: Search bar and Add New Item button */}
-  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-    <TextField
-      placeholder="Search items..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon />
-          </InputAdornment>
-        ),
-      }}
-      sx={{
-        width: '300px',
-        backgroundColor: 'white',
-        borderRadius: 1,
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            borderColor: '#4a4a4a',
-          },
-          '&:hover fieldset': {
-            borderColor: '#333333',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: '#333333',
-          },
-        },
-      }}
-    />
-    <Button 
-      variant="contained" 
-      onClick={handleOpen} 
-      sx={{ 
-        backgroundColor: '#4a4a4a', 
-        '&:hover': { 
-          backgroundColor: '#333333' 
-        } 
-      }}
-    >
-      Add New Item
-    </Button>
-  </Box>
+        display: 'flex', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 2,
+        mb: 4,
+        width: '100%',
+        flexWrap: 'wrap', // Allow wrapping on smaller screens
+      }}>
+        {/* Search bar */}
+        <TextField
+          placeholder="Search items..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            width: '300px',
+            backgroundColor: 'white',
+            borderRadius: 1,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#bdc3c7',
+              },
+              '&:hover fieldset': {
+                borderColor: '#3498db',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#3498db',
+              },
+            },
+          }}
+        />
 
-  {/* Right side: Sorting and Filtering options */}
-  <Box sx={{ display: 'flex', gap: 2 , alignItems:'center'}}>
-  <FilterListIcon sx={{ color: 'text.secondary' }} />
-    <Select
-      value={sortBy}
-      onChange={(e) => setSortBy(e.target.value)}
-      sx={{ width: 150, backgroundColor: 'white' }}
-    >
-      <MenuItem value="name">Sort by Name</MenuItem>
-      <MenuItem value="category">Sort by Category</MenuItem>
-      <MenuItem value="price">Sort by Price</MenuItem>
-      <MenuItem value="quantity">Sort by Quantity</MenuItem>
-    </Select>
-    <Select
-      value={filterCategory}
-      onChange={(e) => setFilterCategory(e.target.value)}
-      sx={{ width: 150, backgroundColor: 'white' }}
-    >
-      <MenuItem value="">All Categories</MenuItem>
-      {categories.map((category) => (
-        <MenuItem key={category} value={category}>{category}</MenuItem>
-      ))}
-    </Select>
-  </Box>
-</Box>
+        {/* Add New Item button */}
+        <Button 
+          variant="contained" 
+          onClick={handleOpen} 
+          startIcon={<AddIcon />}
+          sx={{ 
+            backgroundColor: '#2ecc71', 
+            '&:hover': { 
+              backgroundColor: '#27ae60' 
+            },
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            textTransform: 'none',
+            height: '56px', // Match height with TextField
+          }}
+        >
+          Add New Item
+        </Button>
+
+        {/* Sorting and Filtering options */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <FilterListIcon sx={{ color: '#7f8c8d' }} />
+          <Select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            sx={{ 
+              width: 150, 
+              backgroundColor: 'white',
+              height: '56px', // Match height with TextField
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#bdc3c7',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#3498db',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#3498db',
+              },
+            }}
+          >
+            <MenuItem value="name">Sort by Name</MenuItem>
+            <MenuItem value="category">Sort by Category</MenuItem>
+            <MenuItem value="price">Sort by Price</MenuItem>
+            <MenuItem value="quantity">Sort by Quantity</MenuItem>
+          </Select>
+          <Select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            sx={{ 
+              width: 150, 
+              backgroundColor: 'white',
+              height: '56px', // Match height with TextField
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#bdc3c7',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#3498db',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#3498db',
+              },
+            }}
+          >
+            <MenuItem value="">All Categories</MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category} value={category}>{category}</MenuItem>
+            ))}
+          </Select>
+        </Box>
+      </Box>
+      
 
       {/* Inventory Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
@@ -529,6 +598,7 @@ export default function Home() {
     <Button onClick={handleEditSave}>Save</Button>
   </DialogActions>
 </Dialog>
+    </Box>
     </Box>
   );
 }
