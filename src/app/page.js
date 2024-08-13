@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { 
   Box, Stack, Typography, Button, Modal, TextField, Card, CardContent, 
   IconButton, InputAdornment, Select, MenuItem, Dialog, DialogTitle, 
-  DialogContent, DialogActions
+  DialogContent, DialogActions,
+  Menu
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
@@ -19,7 +20,7 @@ import { firestore } from '@/firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { auth } from '@/firebase';
 
-import styles from './Home.module.css';
+import styles from './home.module.css';
 
 const colors = ['#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFFFBA', '#FFDFBA'];
 
@@ -302,6 +303,7 @@ export default function Home() {
       <MenuItem value="name">Sort by Name</MenuItem>
       <MenuItem value="category">Sort by Category</MenuItem>
       <MenuItem value="price">Sort by Price</MenuItem>
+      <MenuItem value="quantity">Sort by Quantity</MenuItem>
     </Select>
     <Select
       value={filterCategory}
@@ -342,6 +344,9 @@ export default function Home() {
         </Typography>
         <Typography color="text.secondary">
           Category: {item.category}
+        </Typography>
+        <Typography color="text.secondary">
+          Quantity: {item.quantity}
         </Typography>
       </CardContent>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1, backgroundColor: alpha('#ffffff', 0.3) }}>
