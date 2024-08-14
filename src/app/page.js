@@ -201,6 +201,7 @@ export default function Home() {
     if (sortBy === 'name') return a.id.localeCompare(b.id);
     if (sortBy === 'category') return a.category.localeCompare(b.category);
     if (sortBy === 'price') return a.price - b.price;
+    if (sortBy === 'quantity') return a.quantity - b.quantity;
     return 0;
   });
 
